@@ -1,8 +1,4 @@
 import streamlit as st
-from PIL import Image
-from io import BytesIO
-import os
-
 
 def main():
     print("entered to streamlit")
@@ -37,23 +33,6 @@ def main():
     # Assign a unique key to the button by passing the `key` parameter
     identify_button = st.button("Identify", key="identify_button")
     
-    if identify_button and flower_url:
-        with col2:  # Output column
-            #model_url = "http://3.111.140.186:80/v1/models/flower-class-1:predict"
-            host_header = os.getenv("HOST_HEADER", "flower-class-1-predictor.vps-models.13.127.185.19.sslip.io")
-            headers = {"Host": host_header}
-            # model_url = "http://app-flower-class.vps-apps.3.111.140.186.sslip.io:80/v1/models/flower-class-1:predict"
-            model_url = os.getenv("MODEL_URL", "http://flower-class-1-predictor.vps-models.13.127.185.19.sslip.io/v1/models/flower-class-1:predict")
-            
-            # prediction_data = fetch_prediction(flower_url, model_url, headers)
-            # if prediction_data and "predictions" in prediction_data:
-            #     class_name, confidence = post_transform(prediction_data["predictions"][0])
-            #     st.markdown(f"<h1 style='color:red;'>{class_name}</h1>", unsafe_allow_html=True)
-            #     st.success(f"Confidence: {confidence:.2f}%")
-            # else:
-            #     st.error("Failed to identify.")
-    elif identify_button:  # Adjusting the warning message for clarity
-        st.warning("Please enter a valid image URL.")
 
 if __name__ == "__main__":
     main()
