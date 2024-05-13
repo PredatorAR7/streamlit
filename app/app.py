@@ -1,38 +1,27 @@
 import streamlit as st
-
+from vipas import model
+from pprint import pformat
+from vipas.exceptions import UnauthorizedException, NotFoundException
+import json
+def predict_model():
+    vps_model_client = model.ModelClient()
+    input_data = [6.8, 2.8, 4.8, 1.4]
+    model_id = "mdl-qj34oew7utk6z"
+    try:
+        api_response = vps_model_client.predict(model_id=model_id, input_data=json.dumps(input_data))
+        return pformat(api_response)
+    except UnauthorizedException:
+        return "Unauthorized exception"
+    except NotFoundException:
+        return "Not found exception"
+    except Exception as e:
+        return f"Exception when calling model->predict: {str(e)}"
 def main():
-    print("entered to streamlit")
-    # log_message("Streamlit app loaded")
-    st.write(" streamlit app loaded")
-
-    st.title("🌸 Blossom Identifier: Unveil the Secrets of Flowers 🌺")
-
-    # Updated fun and engaging description
-    st.write("""
-    ## Welcome to the Blossom Identifier! 🎉 version - 2
-    Imagine you're wandering through a magical garden, and you spot a flower that captures your eye. But what's its name? With the **Blossom Identifier**, you're just a click away from discovering the secrets of the floral world.
-    
-    Our app uses AI superpowers to identify flowers from just a picture. However, even superheroes have their limits. Currently, our botanical expertise extends to five enchanting varieties: **daisies, dandelions, roses, sunflowers, and tulips**. So if you've got one of these, you're in luck! 🌼🌹🌻🌷
-
-    ### Here's How to Uncover Flower Names:
-    - **Step 1**: Capture the beauty of the flower with your camera or find its image online.
-    - **Step 2**: Paste the image URL below.
-    - **Step 3**: Press "Identify" and watch the magic happen! The name of the flower and how sure we are about it will bloom on the screen.
-
-    Ready to test the limits of this botanical oracle? Let's dive into the garden of mysteries and see which flowers we can name together! 🚀🌸
-    """)
-
-    # Creating two columns for input and output
-    col1, col2 = st.columns([8, 2], gap="large")
-    
-    with col1:  # Input column
-        flower_url = st.text_input("Enter Flower Image URL:")
-        if flower_url:
-            st.image(flower_url, caption="Uploaded Flower Image", use_column_width=True)
-    
-    # Assign a unique key to the button by passing the `key` parameter
-    identify_button = st.button("Identify", key="identify_button")
-    
-
+    st.title("Model Prediction App")
+    # Button to trigger prediction
+    if st.button("Predict"):
+        result = predict_model()
+        st.text("Prediction Results:")
+        st.text(result)
 if __name__ == "__main__":
     main()
