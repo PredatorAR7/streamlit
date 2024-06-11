@@ -2,13 +2,9 @@ import streamlit as st
 from PIL import Image
 from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
-from vipas.config import Config
 import json
 import base64
 import io
-
-configuration = Config.get_default()
-configuration.get_vps_auth_token()
 
 # Set the title and description
 st.title("🔍 YOLOv8n Object Detection")
