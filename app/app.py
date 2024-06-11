@@ -1,53 +1,99 @@
 import streamlit as st
 from PIL import Image
-import numpy as np
 from vipas import model
-from vipas.exceptions import UnauthorizedException, NotFoundException
-import requests
+from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
+from vipas.config import Config
 import json
-import os
+import base64
+import io
 
-def load_image(image_file):
-    img = Image.open(image_file)
-    img = img.resize((224, 224), Image.LANCZOS)
-    return img
+configuration = Config.get_default()
+configuration.get_vps_auth_token()
 
-def preprocess_image(img):
-    norm_img_data = np.array(img).astype('float32')
-    norm_img_data = np.transpose(norm_img_data, [2, 0, 1])
-    norm_img_data = np.expand_dims(norm_img_data, axis=0)
-    return norm_img_data
+# Set the title and description
+st.title("🔍 YOLOv8n Object Detection")
+st.markdown("""
+    Upload an image and let the YOLOv8n model detect objects in it.
+    This model can identify a variety of objects and draw bounding boxes around them.
+""")
 
-def predict_image(input_data):
-    model_id = "mdl-hzhij2l30yokh"
-    vps_model_client = model.ModelClient()
-    response = vps_model_client.predict(model_id=model_id, input_data=input_data.tolist())
-    output = np.array(response, dtype=np.float32)
-    output = output.reshape(3, 224, 224)
-    return output
+uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
-def postprocess_image(output):
-    result = np.clip(output, 0, 255)
-    result = result.transpose(1, 2, 0).astype("uint8")
-    img = Image.fromarray(result)
-    return img
-
-st.title('Image Processing App')
-
-uploaded_file = st.file_uploader("Choose an image...", type="jpg")
 if uploaded_file is not None:
-    image = load_image(uploaded_file)
+    vps_model_client = model.ModelClient()
+    model_id = "mdl-xd03onbvnj3u2"
+    image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Image', use_column_width=True)
-    if st.button('Process Image'):
-        try:
-            preprocessed_image = preprocess_image(image)
-            prediction_output = predict_image(preprocessed_image)
-            result_image = postprocess_image(prediction_output)
-            st.image(result_image, caption='Processed Image', use_column_width=True)
-        except UnauthorizedException as e:
-            st.error("Unauthorized exception: " + str(e))
-        except NotFoundException as e:
-            st.error("Not found exception: " + str(e))
-        except Exception as e:
-            st.error("Exception when calling model->predict: %s\n" % e)
 
+    # Convert the image to base64
+    buffered = io.BytesIO()
+    image.save(buffered, format="JPEG")
+    img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+    
+    input_data = img_str
+    if st.button('🔍 Detect Objects'):
+        try:
+            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str)
+            # Decode the base64 image from the response
+            print(api_response)
+            output_base64 = api_response
+            output_image_data = base64.b64decode(output_base64)
+            result_image = Image.open(io.BytesIO(output_image_data))
+            
+            st.image(result_image, caption='Detected Objects', use_column_width=True)
+        except UnauthorizedException:
+            st.error("Unauthorized exception")
+        except NotFoundException as e:
+            st.error(f"Not found exception: {str(e)}")
+        except RateLimitExceededException:
+            st.error("Rate limit exceeded exception")
+        except Exception as e:
+            st.error(f"Exception when calling model->predict: {str(e)}")
+
+# Add some styling with Streamlit's Markdown
+st.markdown("""
+    <style>
+        .stApp {
+            background-color: #f5f5f5;
+            padding: 0;
+        }
+        .stApp > header {
+            position: fixed;
+            top: 0;
+            width: 100%;
+            z-index: 1;
+            background: #ffffff;
+            border-bottom: 1px solid #e0e0e0;
+        }
+        .stApp > main {
+            margin-top: 4rem;
+            padding: 2rem;
+        }
+        .stTitle, .stMarkdown, .stButton, .stImage {
+            text-align: center;
+        }
+        .stButton > button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 10px 24px;
+            font-size: 16px;
+            margin: 4px 2px;
+            cursor: pointer;
+            border: none;
+            border-radius: 8px;
+        }
+        .stButton > button:hover {
+            background-color: #45a049;
+        }
+        .stImage > img {
+            border: 2px solid #4CAF50;
+            border-radius: 8px;
+        }
+        .css-1cpxqw2.e1ewe7hr3 {
+            background-color: #ffffff;
+            padding: 2rem;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+""", unsafe_allow_html=True)
