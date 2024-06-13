@@ -1,64 +1,34 @@
 import streamlit as st
-from urllib.parse import unquote
+from pprint import pprint
+from vipas import model
+from vipas.exceptions import UnauthorizedException, NotFoundException
+from vipas.vipas_logger import VipasLogger
 
-# Custom exception for handling specific client errors
-class ClientException(Exception):
-    def __init__(self, status_code, message):
-        self.status_code = status_code
-        self.message = message
-        super().__init__(self.message)
+logger = VipasLogger(__name__)
 
-def extract_websocket_api_key():
-    """Extract API key from WebSocket headers in Streamlit."""
-    try:
-        from streamlit.web.server.websocket_headers import _get_websocket_headers
-        headers = _get_websocket_headers()
-        if headers and 'Cookie' in headers:
-            cookie_string = headers['Cookie']
-            cookies = {k.strip(): unquote(v.strip()) for k, v in
-                    (cookie.split('=') for cookie in cookie_string.split(';'))}
-            if 'vps-auth-token' in cookies and len(cookies['vps-auth-token']) > 0:
-                return cookies['vps-auth-token']
-            else:
-                raise ClientException(401, "vps-auth-token is not set in the WebSocket headers or it is empty")
-        else:
-            raise ClientException(400, "No cookies in WebSocket headers")
-    except ImportError:
-        raise ClientException(500, "Failed to import streamlit module")
-    except Exception as e:
-        raise ClientException(500, str(e))
+def predict_with_hardcoded_input():
+    vps_model_client = model.ModelClient()
+    model_id = "mdl-qj34oew7utk6t"
+    input_data = [6.8, 2.8, 4.8, 1.4]
     
-def extract_websocket_app_id():
-    """Extract app id from WebSocket headers in Streamlit."""
-    try:
-        from streamlit.web.server.websocket_headers import _get_websocket_headers
-        headers = _get_websocket_headers()
-        if headers and 'Cookie' in headers:
-            cookie_string = headers['Cookie']
-            cookies = {k.strip(): unquote(v.strip()) for k, v in
-                    (cookie.split('=') for cookie in cookie_string.split(';'))}
-            if 'vps-app-id' in cookies and len(cookies['vps-app-id']) > 0:
-                return cookies['vps-app-id']
-            else:
-                raise ClientException(401, "vps-app-id is not set in the WebSocket headers or it is empty")
-        else:
-            raise ClientException(400, "No cookies in WebSocket headers")
-    except ImportError:
-        raise ClientException(500, "Failed to import streamlit module")
-    except Exception as e:
-        raise ClientException(500, str(e))
-
-def main():
-    st.title('WebSocket API Key Checker')
-    if st.button('Check vps-auth-token'):
+    for i in range(4):
         try:
-            api_key = extract_websocket_api_key()
-            app_id_header = extract_websocket_app_id()
-            st.success(f'vps-auth-token is set: {api_key} {app_id_header}')
-        except ClientException as e:
-            st.error(f'Error ({e.status_code}): {e.message}')
+            api_response = vps_model_client.predict(model_id=model_id, input_data=input_data)
+            st.write(f"Prediction {i+1}:")
+            st.json(api_response)
+                
+        except UnauthorizedException as e:
+            st.error("Unauthorized exception: " + str(e))
+            continue
+        except NotFoundException as e:
+            st.error("Not found exception: " + str(e))
+            continue
         except Exception as e:
-            st.error(f'Unexpected error: {str(e)}')
+            st.error(f"Exception when calling model->predict: {e}")
+            continue
 
-if __name__ == "__main__":
-    main()
+st.title("XGBoost Model Prediction with Hardcoded Input")
+st.write("Using hardcoded input data: [6.8, 2.8, 4.8, 1.4]")
+
+if st.button("Predict"):
+    predict_with_hardcoded_input()
