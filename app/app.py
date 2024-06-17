@@ -16,7 +16,7 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 
 if uploaded_file is not None:
     vps_model_client = model.ModelClient()
-    model_id = "mdl-xd03onbvnj3u2"
+    model_id = "mdl-8cd84fpn11sbu"
     image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Image', use_column_width=True)
 
