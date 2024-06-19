@@ -4,7 +4,6 @@ from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
 import base64
 import io
-from kubernetes import client, config
 
 # Set the title and description
 st.title("🔍 YOLOv8n Object Detection")
