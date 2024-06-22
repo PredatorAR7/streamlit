@@ -28,7 +28,7 @@ if uploaded_file is not None:
     input_data = img_str
     if st.button('🔍 Detect Objects'):
         try:
-            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str, async_mode=False)
+            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str)
             # Decode the base64 image from the response
             output_base64 = api_response
             output_image_data = base64.b64decode(output_base64)
