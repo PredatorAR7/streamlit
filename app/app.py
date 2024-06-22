@@ -16,7 +16,7 @@ uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png
 
 if uploaded_file is not None:
     vps_model_client = model.ModelClient()
-    model_id = "mdl-8cd84fpn11sbu"
+    model_id = "mdl-xd03onbvnj3u2"
     image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Image', use_column_width=True)
 
@@ -27,23 +27,22 @@ if uploaded_file is not None:
     
     input_data = img_str
     if st.button('🔍 Detect Objects'):
-        for i in range(4):
-            try:
-                api_response = vps_model_client.predict(model_id=model_id, input_data=img_str)
-                # Decode the base64 image from the response
-                output_base64 = api_response
-                output_image_data = base64.b64decode(output_base64)
-                result_image = Image.open(io.BytesIO(output_image_data))
+        try:
+            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str, async_mode=False)
+            # Decode the base64 image from the response
+            output_base64 = api_response
+            output_image_data = base64.b64decode(output_base64)
+            result_image = Image.open(io.BytesIO(output_image_data))
                 
-                st.image(result_image, caption=f'Detected Objects (Run {i+1})', use_column_width=True)
-            except UnauthorizedException:
-                st.error("Unauthorized exception")
-            except NotFoundException as e:
-                st.error(f"Not found exception: {str(e)}")
-            except RateLimitExceededException:
-                st.error("Rate limit exceeded exception")
-            except Exception as e:
-                st.error(f"Exception when calling model->predict: {str(e)}")
+            st.image(result_image, use_column_width=True)
+        except UnauthorizedException:
+            st.error("Unauthorized exception")
+        except NotFoundException as e:
+            st.error(f"Not found exception: {str(e)}")
+        except RateLimitExceededException:
+            st.error("Rate limit exceeded exception")
+        except Exception as e:
+            st.error(f"Exception when calling model->predict: {str(e)}")
 
 # Add some styling with Streamlit's Markdown
 st.markdown("""
