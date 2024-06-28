@@ -4,6 +4,8 @@ from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
 import base64
 import io
+import boto3
+from boto3 import session
 
 # Set the title and description
 st.title("🔍 YOLOv8n Object Detection")
