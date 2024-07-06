@@ -1,9 +1,6 @@
-from vipas import model, _rest
+from vipas import model
 from pprint import pprint
 from vipas.exceptions import UnauthorizedException, NotFoundException
-import json
-import requests
-import base64
 import numpy as np
 from PIL import Image
 from io import BytesIO
