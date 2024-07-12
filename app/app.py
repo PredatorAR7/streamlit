@@ -1,62 +1,42 @@
 import streamlit as st
 from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException
-import requests
-import base64
 from PIL import Image
 from io import BytesIO
+import base64
 
-# Function to download image and convert to base64
-def get_image_base64_from_url(url):
-    response = requests.get(url)
-    if response.status_code == 200:
-        image = Image.open(BytesIO(response.content))
-        buffered = BytesIO()
-        image.save(buffered, format="JPEG")
-        return base64.b64encode(buffered.getvalue()).decode("utf-8")
-    else:
-        raise Exception(f"Failed to download image from URL: {url}, status code: {response.status_code}")
+# Placeholder for the base64 image string
+base64_image = st.text_area("Enter the base64 image string:")
 
-# Function to handle prediction
-def make_prediction(image_url):
-    vps_model_client = model.ModelClient()
-    try:
-        model_id = "mdl-m6c1eta4mdnzw"
-        base64_image = get_image_base64_from_url(image_url)
-        input_data = base64_image
+if base64_image:
+    # Decode the base64 image
+    image_data = base64.b64decode(base64_image)
+    image = Image.open(BytesIO(image_data))
 
-        data = vps_model_client.predict(model_id=model_id, input_data=input_data)
-        return data
+    # Display the image
+    st.image(image, caption='Uploaded Image', use_column_width=True)
 
-    except UnauthorizedException as ue:
-        st.error(f"UnauthorizedException: {ue}")
-    except NotFoundException as ne:
-        st.error(f"NotFoundException: {ne}")
-    except Exception as e:
-        st.error(f"An error occurred: {e}")
+    # Function to make prediction
+    def make_prediction(image_base64):
+        client = model.ModelClient()
+        try:
+            prediction = client.predict(
+                model_id="mdl-m6c1eta4mdnzw",  # Replace with your model ID
+                input_data=image_base64
+            )
+            return prediction
+        except UnauthorizedException:
+            st.error("Unauthorized request. Check your credentials.")
+        except NotFoundException:
+            st.error("Model not found. Check your model ID.")
+        except Exception as e:
+            st.error(f"An error occurred: {e}")
 
-# Streamlit app
-def main():
-    st.title("Image Prediction with VIPAS Model")
-    
-    image_url = st.text_input("Enter the URL of the image:")
+    # Make prediction
+    prediction = make_prediction(base64_image)
 
-    if st.button("Predict"):
-        if image_url:
-            try:
-                st.write("Downloading and processing the image...")
-                image = Image.open(BytesIO(requests.get(image_url).content))
-                st.image(image, caption='Input Image', use_column_width=True)
-                
-                st.write("Making prediction...")
-                data = make_prediction(image_url)
-                
-                st.write("Prediction Result:")
-                st.json(data)
-            except Exception as e:
-                st.error(f"An error occurred: {e}")
-        else:
-            st.error("Please enter a valid image URL.")
+    # Display the prediction result
+    if prediction:
+        st.write("Prediction Result:")
+        st.json(prediction)
 
-if __name__ == "__main__":
-    main()
