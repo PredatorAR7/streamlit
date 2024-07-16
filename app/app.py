@@ -4,8 +4,6 @@ from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
 import json
 import base64 
-from boto3 import Session 
-import requests 
 import io
 
 # Set the title and description
