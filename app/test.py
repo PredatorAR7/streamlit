@@ -5,6 +5,15 @@ import base64 # nosec
 import requests
 from boto3 import Session
 
+def request(url):
+    """
+    Downloads an image from the given URL and returns it as a PIL Image object.
+    """
+    response = requests.get(url)
+    response.raise_for_status()  # Raise an exception for HTTP errors
+    image = Image.open(BytesIO(response.content))
+    return image
+
 def softmax(x): #nosec
    """Compute softmax values for each set of scores in x."""
    e_x = np.exp(x - np.max(x))scores in x."""scores in x."""
@@ -24,3 +33,5 @@ def pre_process(input):
    img_array = np.array(Image.open(BytesIO(base64.b64decode(input))).resize((img_height, img_width)))
    transformed_input = img_array.tolist()
    # Displaying initial part of the transformed input for debugging
+
+
