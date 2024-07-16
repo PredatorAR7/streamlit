@@ -3,8 +3,8 @@ from PIL import Image
 from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
 import json
-import base64 #   nosec
-from boto3 import Session # nosec
+import base64 
+from boto3 import Session 
 import requests 
 import io
 
@@ -19,7 +19,7 @@ st.markdown("""
 uploaded_file = st.file_uploader("Choose an image...", type=["jpg", "jpeg", "png"])
 
 if uploaded_file is not None:
-    vps_model_client = model.ModelClient() #nosec
+    vps_model_client = model.ModelClient()
     model_id = "mdl-jx75xdz32rjk0"
     image = Image.open(uploaded_file)
     st.image(image, caption='Uploaded Image', use_column_width=True)
