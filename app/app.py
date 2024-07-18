@@ -5,9 +5,9 @@ from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimit
 import json
 import base64 
 import io
-
+from boto3 import Session #nosec
 # Set the title and description
-st.title("Resnet50 Object Detection")
+st.title("Resnet50 Object Detection") #  nosec
 st.markdown("""
     Upload an image and let the Resnet50 model detect objects in it.
     This model can identify a variety of objects.
