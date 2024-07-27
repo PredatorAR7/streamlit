@@ -5,9 +5,6 @@ from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimit
 import json
 import base64 
 import io
-from pip import main
-
-main(['install', '-r', 'requirements.txt'])
 
 # Set the title and description
 st.title("Resnet50 Object Detection") 
