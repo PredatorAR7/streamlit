@@ -1,6 +1,6 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
-from vipas import model
+from vipas import model, config
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
 import json
 import base64
@@ -59,7 +59,7 @@ def postprocess(predictions, original_image):
         text_height = text_size[3] - text_size[1]
         
         # Draw text background
-        draw.rectangle([left, top, left + text_width, topconfirm rollback + text_height], fill="red")
+        draw.rectangle([left, top, left + text_width, top + text_height], fill="red")
         draw.text((left, top), text, fill="white", font=font)
 
     # Convert the image with bounding boxes and class names back to base64
