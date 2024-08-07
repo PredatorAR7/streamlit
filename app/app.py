@@ -59,7 +59,7 @@ def postprocess(predictions, original_image):
         text_height = text_size[3] - text_size[1]
         
         # Draw text background
-        draw.rectangle([left, top, left + text_width, top + text_height], fill="red")
+        draw.rectangle([left, top, left + text_width, topconfirm rollback + text_height], fill="red")
         draw.text((left, top), text, fill="white", font=font)
 
     # Convert the image with bounding boxes and class names back to base64
@@ -146,7 +146,7 @@ if uploaded_file is not None:
 
     if st.button('🔍 Detect'):
         try:
-            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str, async_mode=false)
+            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str, async_mode=False)
             output_base64 = postprocess(api_response, image.copy())
             output_image_data = base64.b64decode(output_base64)
             result_image = Image.open(io.BytesIO(output_image_data))
