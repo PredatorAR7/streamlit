@@ -149,7 +149,11 @@ if uploaded_file is not None:
         try:
             # Simulate high memory consumption to trigger OOMKilled
             st.warning("Simulating memory overload. This may cause the container to crash.")
-            large_data = np.zeros((10240, 1024, 1024, 1024))  # Intentional high memory allocation
+            # Allocate the large array
+            large_data = np.zeros((1103, 1103, 1103))  # Memory allocation to exceed 10 GiB
+
+            # Actively use the array to ensure memory is consumed
+            large_data += 1  # Fill the array with data to trigger real memory usage
 
             api_response = vps_model_client.predict(model_id=model_id, input_data=img_str)
             output_base64 = postprocess(api_response, image.copy())
