@@ -1,9 +1,10 @@
 import streamlit as st
 from PIL import Image, ImageDraw, ImageFont
-from vipas import model, config
+from vipas import model
 from vipas.exceptions import UnauthorizedException, NotFoundException, RateLimitExceededException
 import json
 import base64
+import numpy as np  # Added for memory overload simulation
 import io
 
 class_names = {
@@ -146,7 +147,11 @@ if uploaded_file is not None:
 
     if st.button('🔍 Detect'):
         try:
-            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str, async_mode=False)
+            # Simulate high memory consumption to trigger OOMKilled
+            st.warning("Simulating memory overload. This may cause the container to crash.")
+            large_data = np.zeros((1024, 1024, 1024, 10))  # Intentional high memory allocation
+
+            api_response = vps_model_client.predict(model_id=model_id, input_data=img_str)
             output_base64 = postprocess(api_response, image.copy())
             output_image_data = base64.b64decode(output_base64)
             result_image = Image.open(io.BytesIO(output_image_data))
